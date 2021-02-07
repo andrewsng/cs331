@@ -9,4 +9,17 @@
 local pa2 = {}
 
 
+function pa2.filterArray(p, t)
+    filtered = {}
+    
+    for i, v in ipairs(t) do
+        if p(t[i]) then
+            table.insert(filtered, v)
+        end
+    end
+        
+    return filtered
+end
+
+
 return pa2
