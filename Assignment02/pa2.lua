@@ -56,4 +56,14 @@ function pa2.collatz(k)
 end
 
 
+function pa2.substrings(s)
+    coroutine.yield("")
+    for len = 1, #s do
+        for i = 1, #s - len + 1 do
+            coroutine.yield(s:sub(i, i + len - 1))
+        end
+    end
+end
+
+
 return pa2
