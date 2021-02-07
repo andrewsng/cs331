@@ -10,7 +10,7 @@ local pa2 = {}
 
 
 function pa2.filterArray(p, t)
-    filtered = {}
+    local filtered = {}
     
     for i, v in ipairs(t) do
         if p(t[i]) then
@@ -23,7 +23,7 @@ end
 
 
 function pa2.concatMax(str, n)
-    concat = ""
+    local concat = ""
     
     while (#concat + #str <= n) do
         concat = concat .. str
@@ -31,6 +31,29 @@ function pa2.concatMax(str, n)
     
     return concat
 end
+
+
+function pa2.collatz(k)
+    local done = false
+    local function iter(dummy1, dummy2)
+        if done then
+            return nil
+        end
+        
+        local save_k = k
+        if k == 1 then
+            done = true
+        elseif (k % 2) == 0 then
+            k = k / 2
+        else
+            k = 3 * k + 1
+        end
+        
+        return save_k
+    end
     
+    return iter, nil, nil
+end
+
 
 return pa2
