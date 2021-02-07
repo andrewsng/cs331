@@ -22,4 +22,15 @@ function pa2.filterArray(p, t)
 end
 
 
+function pa2.concatMax(str, n)
+    concat = ""
+    
+    while (#concat + #str <= n) do
+        concat = concat .. str
+    end
+    
+    return concat
+end
+    
+
 return pa2
