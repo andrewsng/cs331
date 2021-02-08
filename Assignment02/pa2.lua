@@ -1,7 +1,8 @@
 #!/usr/bin/env lua
 -- pa2.lua
 -- Andrew S. Ng
--- 2021-06-02
+-- Started: 2021-02-06
+-- Updated: 2021-02-07
 -- 
 -- For CS 331 Spring 2021
 -- Module for Assignment 2 Functions
