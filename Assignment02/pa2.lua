@@ -1,7 +1,7 @@
 #!/usr/bin/env lua
 -- pa2.lua
 -- Andrew S. Ng
--- Started: 2021-02-06
+-- Created: 2021-02-06
 -- Updated: 2021-02-07
 -- 
 -- For CS 331 Spring 2021
