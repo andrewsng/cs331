@@ -169,11 +169,8 @@ function lexit.lex(program)
     local DIGIT  = 3
     local DIGEXP = 4
     local STRING = 5
-    local DOT    = 6
-    local PLUS   = 7
-    local MINUS  = 8
-    local EQUAL  = 9
-    local BANG   = 10
+    local EQUAL  = 6
+    local BANG   = 7
 
     -- ***** Character-Related Utility Functions *****
 
@@ -266,15 +263,6 @@ function lexit.lex(program)
         elseif isDigit(ch) then
             add1()
             state = DIGIT
---        elseif ch == "." then
---            add1()
---            state = DOT
---        elseif ch == "+" then
---            add1()
---            state = PLUS
---        elseif ch == "-" then
---            add1()
---            state = MINUS
         elseif ch == "\"" then
             add1()
             state = STRING
@@ -348,6 +336,7 @@ function lexit.lex(program)
         end
     end
     
+    -- State STRING: we are in a STRLIT
     local function handle_STRING()
         if ch == "\"" then
             add1()
@@ -358,63 +347,6 @@ function lexit.lex(program)
             category = lexit.MAL
         else
             add1()
-        end
-    end
-
-    -- State DOT: we have seen a dot (".") and nothing else.
-    local function handle_DOT()
-        if isDigit(ch) then
-            add1()
-            state = DIGDOT
-        else
-            state = DONE
-            category = lexit.OP
-        end
-    end
-
-    -- State PLUS: we have seen a plus ("+") and nothing else.
-    local function handle_PLUS()
-        if isDigit(ch) then
-            add1()
-            state = DIGIT
-        elseif ch == "." then
-            if isDigit(nextChar()) then  -- lookahead
-                add1()  -- add dot to lexeme
-                state = DIGDOT
-            else        -- lexeme is just "+"; do not add dot to lexeme
-                state = DONE
-                category = lexit.OP
-            end
-        elseif ch == "+" or ch == "=" then
-            add1()
-            state = DONE
-            category = lexit.OP
-        else
-            state = DONE
-            category = lexit.OP
-        end
-    end
-
-    -- State MINUS: we have seen a minus ("-") and nothing else.
-    local function handle_MINUS()
-        if isDigit(ch) then
-            add1()
-            state = DIGIT
-        elseif ch == "." then
-            if isDigit(nextChar()) then  -- lookahead
-                add1()  -- add dot to lexeme
-                state = DIGDOT
-            else        -- lexeme is just "-"; do not add dot to lexeme
-                state = DONE
-                category = lexit.OP
-            end
-        elseif ch == "-" or ch == "=" then
-            add1()
-            state = DONE
-            category = lexit.OP
-        else
-            state = DONE
-            category = lexit.OP
         end
     end
 
@@ -452,9 +384,6 @@ function lexit.lex(program)
         [DIGIT]=handle_DIGIT,
         [DIGEXP]=handle_DIGEXP,
         [STRING]=handle_STRING,
-        [DOT]=handle_DOT,
-        [PLUS]=handle_PLUS,
-        [MINUS]=handle_MINUS,
         [EQUAL]=handle_EQUAL,
         [BANG]=handle_BANG,
     }
