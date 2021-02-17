@@ -171,7 +171,8 @@ function lexit.lex(program)
     local DOT    = 5
     local PLUS   = 6
     local MINUS  = 7
-    local STAR   = 8
+    local EQUAL  = 8
+    local BANG   = 9
 
     -- ***** Character-Related Utility Functions *****
 
@@ -267,15 +268,23 @@ function lexit.lex(program)
 --        elseif ch == "." then
 --            add1()
 --            state = DOT
-        elseif ch == "+" then
+--        elseif ch == "+" then
+--            add1()
+--            state = PLUS
+--        elseif ch == "-" then
+--            add1()
+--            state = MINUS
+        elseif ch == "+" or ch == "-" or ch == "*" or ch == "/"
+          or ch == "%" or ch == "[" or ch == "]" then
             add1()
-            state = PLUS
-        elseif ch == "-" then
+            state = DONE
+            category= lexit.OP
+        elseif ch == "=" or ch == "<" or ch == ">" then
             add1()
-            state = MINUS
-        elseif ch == "*" or ch == "/" or ch == "=" then
+            state = EQUAL
+        elseif ch == "!" then
             add1()
-            state = STAR
+            state = BANG
         else
             add1()
             state = DONE
@@ -392,9 +401,9 @@ function lexit.lex(program)
         end
     end
 
-    -- State STAR: we have seen a star ("*"), slash ("/"), or equal
-    -- ("=") and nothing else.
-    local function handle_STAR()  -- Handle * or / or =
+    -- State EQUAL: we have seen an equal ("="), left angle
+    -- bracket ("<"), or right angle bracket (">") and nothing else.
+    local function handle_EQUAL()  -- Handle = or < or >
         if ch == "=" then
             add1()
             state = DONE
@@ -402,6 +411,18 @@ function lexit.lex(program)
         else
             state = DONE
             category = lexit.OP
+        end
+    end
+    
+    -- State BANG: we have seen a bang ("!"), and nothing else.
+    local function handle_BANG()  -- Handle !
+        if ch == "=" then
+            add1()
+            state = DONE
+            category = lexit.OP
+        else
+            state = DONE
+            category = lexit.PUNCT
         end
     end
 
@@ -416,7 +437,8 @@ function lexit.lex(program)
         [DOT]=handle_DOT,
         [PLUS]=handle_PLUS,
         [MINUS]=handle_MINUS,
-        [STAR]=handle_STAR,
+        [EQUAL]=handle_EQUAL,
+        [BANG]=handle_BANG,
     }
 
     -- ***** Iterator Function *****
