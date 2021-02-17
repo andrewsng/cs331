@@ -167,7 +167,7 @@ function lexit.lex(program)
     local START  = 1
     local LETTER = 2
     local DIGIT  = 3
-    local DIGDOT = 4
+    local DIGEXP = 4
     local DOT    = 5
     local PLUS   = 6
     local MINUS  = 7
@@ -189,6 +189,14 @@ function lexit.lex(program)
     -- is past the end.
     local function nextChar()
         return program:sub(pos+1, pos+1)
+    end
+    
+    -- secondNextChar
+    -- Return the second next character, at index pos+2 in program. Return
+    -- value is a single-character string, or the empty string if pos+2
+    -- is past the end.
+    local function secondNextChar()
+        return program:sub(pos+2, pos+2)
     end
 
     -- drop1
@@ -216,17 +224,15 @@ function lexit.lex(program)
             end
 
             -- Done if no comment
-            if currChar() ~= "/" or nextChar() ~= "*" then
+            if currChar() ~= "#" then
                 break
             end
 
             -- Skip comment
-            drop1()  -- Drop leading "/"
-            drop1()  -- Drop leading "*"
+            drop1()  -- Drop leading "#"
             while true do
-                if currChar() == "*" and nextChar() == "/" then
-                    drop1()  -- Drop trailing "*"
-                    drop1()  -- Drop trailing "/"
+                if currChar() == "\n" then
+                    drop1()  -- Drop trailing "\n"
                     break
                 elseif currChar() == "" then  -- End of input?
                    return
@@ -258,9 +264,9 @@ function lexit.lex(program)
         elseif isDigit(ch) then
             add1()
             state = DIGIT
-        elseif ch == "." then
-            add1()
-            state = DOT
+--        elseif ch == "." then
+--            add1()
+--            state = DOT
         elseif ch == "+" then
             add1()
             state = PLUS
@@ -296,21 +302,31 @@ function lexit.lex(program)
         end
     end
 
-    -- State DIGIT: we are in a NUMLIT, and we have NOT seen ".".
+    -- State DIGIT: we are in a NUMLIT, and we have NOT seen "E" or "E+".
     local function handle_DIGIT()
         if isDigit(ch) then
             add1()
-        elseif ch == "." then
-            add1()
-            state = DIGDOT
+        elseif ch == "e" or ch == "E" then
+            if isDigit(nextChar()) then  -- lookahead
+                add1()
+                state = DIGEXP
+            elseif nextChar() == "+" and  -- lookahead twice
+              isDigit(secondNextChar()) then
+                add1()
+                add1()
+                state = DIGEXP
+            else
+                state = DONE
+                category = lexit.NUMLIT
+            end
         else
             state = DONE
             category = lexit.NUMLIT
         end
     end
 
-    -- State DIGDOT: we are in a NUMLIT, and we have seen ".".
-    local function handle_DIGDOT()
+    -- State DIGEXP: we are in a NUMLIT, and we have seen "E" or "E+".
+    local function handle_DIGEXP()
         if isDigit(ch) then
             add1()
         else
@@ -396,7 +412,7 @@ function lexit.lex(program)
         [START]=handle_START,
         [LETTER]=handle_LETTER,
         [DIGIT]=handle_DIGIT,
-        [DIGDOT]=handle_DIGDOT,
+        [DIGEXP]=handle_DIGEXP,
         [DOT]=handle_DOT,
         [PLUS]=handle_PLUS,
         [MINUS]=handle_MINUS,
