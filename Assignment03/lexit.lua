@@ -168,11 +168,12 @@ function lexit.lex(program)
     local LETTER = 2
     local DIGIT  = 3
     local DIGEXP = 4
-    local DOT    = 5
-    local PLUS   = 6
-    local MINUS  = 7
-    local EQUAL  = 8
-    local BANG   = 9
+    local STRING = 5
+    local DOT    = 6
+    local PLUS   = 7
+    local MINUS  = 8
+    local EQUAL  = 9
+    local BANG   = 10
 
     -- ***** Character-Related Utility Functions *****
 
@@ -274,6 +275,9 @@ function lexit.lex(program)
 --        elseif ch == "-" then
 --            add1()
 --            state = MINUS
+        elseif ch == "\"" then
+            add1()
+            state = STRING
         elseif ch == "+" or ch == "-" or ch == "*" or ch == "/"
           or ch == "%" or ch == "[" or ch == "]" then
             add1()
@@ -341,6 +345,19 @@ function lexit.lex(program)
         else
             state = DONE
             category = lexit.NUMLIT
+        end
+    end
+    
+    local function handle_STRING()
+        if ch == "\"" then
+            add1()
+            state = DONE
+            category = lexit.STRLIT
+        elseif ch == "\n" or ch == "" then
+            state = DONE
+            category = lexit.MAL
+        else
+            add1()
         end
     end
 
@@ -434,6 +451,7 @@ function lexit.lex(program)
         [LETTER]=handle_LETTER,
         [DIGIT]=handle_DIGIT,
         [DIGEXP]=handle_DIGEXP,
+        [STRING]=handle_STRING,
         [DOT]=handle_DOT,
         [PLUS]=handle_PLUS,
         [MINUS]=handle_MINUS,
