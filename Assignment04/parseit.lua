@@ -333,7 +333,33 @@ function parse_complex_stmt()
     local good, ast1, ast2, ast3, ast4, savelex
 
     if matchString("def") then
-        -- TODO: WRITE THIS!!!
+        savelex = lexstr
+        if not matchCat(lexit.ID) then
+            return false, nil
+        end
+
+        if not matchString("(") then
+            return false, nil
+        end
+
+        if not matchString(")") then
+            return false, nil
+        end
+
+        if not matchString("{") then
+            return false, nil
+        end
+        
+        good, ast1 = parse_stmt_list()
+        if not good then
+            return false, nil
+        end
+
+        if not matchString("}") then
+            return false, nil
+        end
+
+        return true, { FUNC_DEF, savelex, ast1 }
 
     elseif matchString("if") then
         -- TODO: WRITE THIS!!!
