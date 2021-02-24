@@ -1,9 +1,14 @@
--- parseit.lua  INCOMPLETE
+-- parseit.lua
+-- Andrew S. Ng
+-- Started: 2021-02-23
+--
+-- For CS 331 Spring 2021
+-- parseit module for Caracal language
+--
+-- Original parseit.lua by
 -- Glenn G. Chappell
 -- 2021-02-17
 --
--- For CS F331 / CSCE A331 Spring 2021
--- Solution to Assignment 4, Exercise 1
 -- Requires lexit.lua
 
 
