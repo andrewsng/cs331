@@ -602,7 +602,72 @@ end
 -- Parsing function for nonterminal "factor".
 -- Function init must be called before this function is called.
 function parse_factor()
-    -- TODO: WRITE THIS!!!
+    local good, ast1, savelex
+
+    savelex = lexstr
+    if matchString("(") then
+        good, ast1 = parse_expr()
+        if not good then
+            return false, nil
+        end
+
+        if not matchString(")") then
+            return false, nil
+        end
+
+        return true, ast1
+        
+    elseif matchString("+") or matchString("-") or matchString("not") then
+        good, ast1 = parse_factor()
+        if not good then
+            return false, nil
+        end
+
+        return true, { { UN_OP, savelex }, ast1 }
+        
+    elseif matchCat(lexit.NUMLIT) then
+        return true, { NUMLIT_VAL, savelex }
+
+    elseif matchString("true") or matchString("false") then
+        return true, { BOOLLIT_VAL, savelex }
+
+    elseif matchString("readnum") then
+        if not matchString("(") then
+            return false, nil
+        end
+
+        if not matchString(")") then
+            return false, nil
+        end
+
+        return true, { READNUM_CALL }
+
+    elseif (matchCat(lexit.ID)) then
+        if matchString("(") then
+            if not matchString(")") then
+                return false, nil
+            end
+
+            return true, { FUNC_CALL, savelex }
+            
+        elseif matchString("[") then
+            good, ast1 = parse_expr()
+            if not good then
+                return false, nil
+            end
+
+            if not matchString("]") then
+                return false, nil
+            end
+
+            return true, { ARRAY_VAR, savelex, ast1 }
+        
+        else
+            return true, { SIMPLE_VAR, savelex }
+        end
+    else
+        return false, nil
+    end
 end
 
 
