@@ -273,11 +273,55 @@ function parse_simple_stmt()
         return true, ast2
 
     elseif matchString("return") then
-        -- TODO: WRITE THIS!!!
+        good, ast1 = parse_expr()
+        if not good then
+            return false, nil
+        end
+        
+        return true, { RETURN_STMT, ast1 }
 
     else
-        -- TODO: WRITE THIS!!!
+        savelex = lexstr
+        if not matchCat(lexit.ID) then
+            return false, nil
+        end
 
+        if matchString("(") then
+            if not matchString(")") then
+                return false, nil
+            end
+
+            return true, { FUNC_CALL, savelex }
+        end
+        
+        ast2 = { ASSN_STMT }
+
+        if matchString("[") then
+            good, ast1 = parse_expr()
+            if not good then
+                return false, nil
+            end
+            if not matchString("]") then
+                return false, nil
+            end
+
+            table.insert(ast2, { ARRAY_VAR, savelex, ast1 })
+        else
+            table.insert(ast2, { SIMPLE_VAR, savelex })
+        end
+
+        if not matchString("=") then
+            return false, nil
+        end
+
+        good, ast1 = parse_expr()
+        if not good then
+            return false, nil
+        end
+        
+        table.insert(ast2, ast1)
+
+        return true, ast2
     end
 end
 
