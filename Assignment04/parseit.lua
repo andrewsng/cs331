@@ -410,7 +410,35 @@ function parse_write_arg()
     if matchCat(lexit.STRLIT) then
         return true, { STRLIT_OUT, savelex }
 
-        -- TODO: WRITE THIS!!!
+    elseif matchString("cr") then
+        return true, { CR_OUT }
+
+    elseif matchString("dq") then
+        return true, { DQ_OUT }
+
+    elseif matchString("char") then
+        if not matchString("(") then
+            return false, nil
+        end
+
+        good, ast1 = parse_expr()
+        if not good then
+            return false, nil
+        end
+
+        if not matchString(")") then
+            return false, nil
+        end
+
+        return true, { CHAR_CALL, ast1 }
+
+    else
+        good, ast1 = parse_expr()
+        if not good then
+            return false, nil
+        end
+
+        return true, ast1
     end
 end
 
