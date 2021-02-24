@@ -362,7 +362,83 @@ function parse_complex_stmt()
         return true, { FUNC_DEF, savelex, ast1 }
 
     elseif matchString("if") then
-        -- TODO: WRITE THIS!!!
+        ast2 = { IF_STMT }
+
+        if not matchString("(") then
+            return false, nil
+        end
+
+        good, ast1 = parse_expr()
+        if not good then
+            return false, nil
+        end
+        table.insert(ast2, ast1)
+
+        if not matchString(")") then
+            return false, nil
+        end
+
+        if not matchString("{") then
+            return false, nil
+        end
+        
+        good, ast1 = parse_stmt_list()
+        if not good then
+            return false, nil
+        end
+        table.insert(ast2, ast1)
+
+        if not matchString("}") then
+            return false, nil
+        end
+
+        while matchString("elseif") do
+            if not matchString("(") then
+                return false, nil
+            end
+
+            good, ast1 = parse_expr()
+            if not good then
+                return false, nil
+            end
+            table.insert(ast2, ast1)
+
+            if not matchString(")") then
+                return false, nil
+            end
+
+            if not matchString("{") then
+                return false, nil
+            end
+            
+            good, ast1 = parse_stmt_list()
+            if not good then
+                return false, nil
+            end
+            table.insert(ast2, ast1)
+
+            if not matchString("}") then
+                return false, nil
+            end
+        end
+        
+        if matchString("else") then
+            if not matchString("{") then
+                return false, nil
+            end
+
+            good, ast1 = parse_stmt_list()
+            if not good then
+                return false, nil
+            end
+            table.insert(ast2, ast1)
+
+            if not matchString("}") then
+                return false, nil
+            end
+        end
+        
+        return true, ast2
 
     elseif matchString("for") then
         if not matchString("(") then
