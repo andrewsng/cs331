@@ -506,7 +506,7 @@ end
 -- Parsing function for nonterminal "write_arg".
 -- Function init must be called before this function is called.
 function parse_write_arg()
-    local savelex, good, ast1
+    local good, ast1, savelex
 
     savelex = lexstr
     if matchCat(lexit.STRLIT) then
@@ -549,7 +549,28 @@ end
 -- Parsing function for nonterminal "expr".
 -- Function init must be called before this function is called.
 function parse_expr()
-    -- TODO: WRITE THIS!!!
+    local good, ast1, ast2, savelex
+
+    good, ast1 = parse_compare_expr()
+    if not good then
+        return false, nil
+    end
+
+    while true do
+        savelex = lexstr
+        if matchString("and") or matchString("or") then
+            good, ast2 = parse_compare_expr()
+            if not good then
+                return false, nil
+            end
+            
+            ast1 = { { BIN_OP, savelex }, ast1, ast2 }
+        else
+            break
+        end
+    end
+    
+    return true, ast1
 end
 
 
