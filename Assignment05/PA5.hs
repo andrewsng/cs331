@@ -29,7 +29,9 @@ findList l1 l2
 
 -- operator ##
 (##) :: Eq a => [a] -> [a] -> Int
-_ ## _ = 42  -- DUMMY; REWRITE THIS!!!
+l1 ## l2 = length matches where
+    matches = [ i | i <- [0..len-1], (l1 !! i) == (l2 !! i) ] where
+        len = min (length l1) (length l2)
 
 
 -- filterAB
