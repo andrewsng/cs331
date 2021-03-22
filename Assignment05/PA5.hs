@@ -10,8 +10,12 @@ module PA5 where
 
 -- collatzCounts
 collatzCounts :: [Integer]
-collatzCounts = [42..]  -- DUMMY; REWRITE THIS!!!
-
+collatzCounts = map collatzCount [1..] where
+    collatzCount k = collatzIter k 0 where
+        collatzIter k n
+            | k == 1  = n
+            | odd k   = collatzIter (3*k+1) (n+1)
+            | even k  = collatzIter (div k 2) (n+1)
 
 -- findList
 findList :: Eq a => [a] -> [a] -> Maybe Int
