@@ -36,7 +36,12 @@ l1 ## l2 = length matches where
 
 -- filterAB
 filterAB :: (a -> Bool) -> [a] -> [b] -> [b]
-filterAB _ _ bs = bs  -- DUMMY; REWRITE THIS!!!
+filterAB _ _ [] = []
+filterAB _ [] _ = []
+filterAB p (a:as) (b:bs)
+    | p a        = b:rest
+    | otherwise  = rest where
+        rest = filterAB p as bs
 
 
 -- sumEvenOdd
