@@ -12,9 +12,9 @@ module PA5 where
 collatzCounts :: [Integer]
 collatzCounts = map collatzCount [1..] where
     collatzCount k
-        | k == 1        = 0
-        | mod k 2 == 1  = 1 + collatzCount (3*k+1)
-        | otherwise     = 1 + collatzCount (div k 2)
+        | k == 1     = 0
+        | odd k      = 1 + collatzCount (3*k+1)
+        | otherwise  = 1 + collatzCount (div k 2)
 
 -- findList
 findList :: Eq a => [a] -> [a] -> Maybe Int
@@ -46,15 +46,8 @@ filterAB p (a:as) (b:bs)
 
 -- sumEvenOdd
 sumEvenOdd :: Num a => [a] -> (a, a)
-{-
-  The assignment requires sumEvenOdd to be written using a fold.
-  Something like this:
-
-    sumEvenOdd xs = fold* ... xs where
-        ...
-
-  Above, "..." should be replaced by other code. The "fold*" must be
-  one of the following: foldl, foldr, foldl1, foldr1.
--}
-sumEvenOdd _ = (0, 0)  -- DUMMY; REWRITE THIS!!!
+sumEvenOdd xs = foldl addNum (0, 0) xs where
+    addNum pair x
+        | even $ length xs  = (snd pair, fst pair + x)
+        | otherwise         = (snd pair + x, fst pair)
 
