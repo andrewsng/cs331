@@ -18,7 +18,13 @@ collatzCounts = map collatzCount [1..] where
 
 -- findList
 findList :: Eq a => [a] -> [a] -> Maybe Int
-findList _ _ = Just 42  -- DUMMY; REWRITE THIS!!!
+findList l1 l2 
+    | null indices  = Nothing
+    | otherwise     = Just $ head indices where
+        indices = [ x | x <- [0..len2-1], (sublist l2 x len1) == l1 ] where
+            len1 = length l1
+            len2 = length l2
+            sublist l i size = take size $ drop i l
 
 
 -- operator ##
