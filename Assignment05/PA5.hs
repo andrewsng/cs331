@@ -1,9 +1,14 @@
--- PA5.hs  INCOMPLETE
+-- PA5.hs
+-- Andrew S. Ng
+-- Started: 2021-21-03
+-- Updated: 2021-30-03
+--
+-- For CS 331 Spring 2021
+-- Solutions to Assignment 5 Exercise B
+--
+-- Original PA5.hs by
 -- Glenn G. Chappell
 -- 2021-03-16
---
--- For CS F331 / CSCE A331 Spring 2021
--- Solutions to Assignment 5 Exercise B
 
 module PA5 where
 
@@ -15,6 +20,7 @@ collatzCounts = map collatzCount [1..] where
         | k == 1     = 0
         | odd k      = 1 + collatzCount (3*k+1)
         | otherwise  = 1 + collatzCount (div k 2)
+
 
 -- findList
 findList :: Eq a => [a] -> [a] -> Maybe Int
