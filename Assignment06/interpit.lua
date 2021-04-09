@@ -211,14 +211,20 @@ function interpit.interp(ast, state, incall, outcall)
                 elseif ast[i][1] == CR_OUT then
                     outcall("\n")
                 elseif ast[i][1] == DQ_OUT then
-                    print("*** UNIMPLEMENTED WRITE ARG")
+                    outcall("\"")
                 elseif ast[i][1] == CHAR_CALL then
-                    print("*** UNIMPLEMENTED WRITE ARG")
+                    local n = eval_expr(ast[i][2])
+                    if (n < 0) or (n > 255) then
+                        n = 0
+                    end
+                    outcall(string.char(n))
                 else  -- Expression
                     local val = eval_expr(ast[i])
                     outcall(numToStr(val))
                 end
             end
+        elseif ast[1] == RETURN_STMT then
+            state.v["return"] = eval_expr(ast[2])
         elseif ast[1] == FUNC_DEF then
             local funcname = ast[2]
             local funcbody = ast[3]
@@ -230,8 +236,49 @@ function interpit.interp(ast, state, incall, outcall)
                 funcbody = { STMT_LIST }
             end
             interp_stmt_list(funcbody)
-        else
-            print("*** UNIMPLEMENTED STATEMENT")
+        elseif ast[1] == ASSN_STMT then
+            if ast[2][1] == SIMPLE_VAR then
+                local var = ast[2][2]
+                local rhs = eval_expr(ast[3])
+                state.v[var] = rhs
+            else
+                local var = ast[2][2]
+                if state.a[var] == nil then
+                    state.a[var] = {}
+                end
+                local index = eval_expr(ast[2][3])
+                local rhs = eval_expr(ast[3])
+                state.a[var][index] = rhs
+            end
+        elseif ast[1] == IF_STMT then
+            for i = 2, #ast, 2 do
+                if ast[i][1] == STMT_LIST then
+                    interp_stmt_list(ast[i])
+                    break
+                elseif eval_expr(ast[i]) ~= 0 then
+                    interp_stmt_list(ast[i+1])
+                    break
+                end
+            end
+        else  -- For loop
+            local init = ast[2]
+            local cond = ast[3]
+            local inc  = ast[4]
+            local body = ast[5]
+            if #init ~= 0 then
+                interp_stmt(init)
+            end
+            while true do
+                if #cond ~= 0 then
+                    if eval_expr(cond) == 0 then
+                        break
+                    end
+                end
+                interp_stmt_list(body)
+                if #inc ~= 0 then
+                    interp_stmt(inc)
+                end
+            end
         end
     end
 
@@ -250,8 +297,12 @@ function interpit.interp(ast, state, incall, outcall)
                 result = 0
             end
         elseif ast[1] == ARRAY_VAR then
+            local array = state.a[ast[2]]
             local index = eval_expr(ast[3])
-            result = state.a[ast[2]][index]
+            if array == nil then
+                array = {[index]=0}
+            end
+            result = array[index]
             if result == nil then
                 result = 0
             end
