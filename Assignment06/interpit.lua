@@ -244,9 +244,83 @@ function interpit.interp(ast, state, incall, outcall)
 
         if ast[1] == NUMLIT_VAL then
             result = strToNum(ast[2])
-        else
-            print("*** UNIMPLEMENTED EXPRESSION")
-            result = 42  -- DUMMY VALUE
+        elseif ast[1] == SIMPLE_VAR then
+            result = state.v[ast[2]]
+            if result == nil then
+                result = 0
+            end
+        elseif ast[1] == ARRAY_VAR then
+            local index = eval_expr(ast[3])
+            result = state.a[ast[2]][index]
+            if result == nil then
+                result = 0
+            end
+        elseif ast[1] == BOOLLIT_VAL then
+            result = boolToInt(ast[2])
+        elseif ast[1] == FUNC_CALL then
+            local funcname = ast[2]
+            local funcbody = state.f[ast[2]]
+            if funcbody == nil then
+                funcbody = { STMT_LIST }
+            end
+            interp_stmt_list(funcbody)
+            result = state.v["return"]
+            if result == nil then
+                result = 0
+            end
+        elseif ast[1] == READNUM_CALL then
+            result = strToNum(incall())
+        elseif type(ast[1]) == "table" then
+            if ast[1][1] == UN_OP then
+                local op = ast[1][2]
+                local rhs = eval_expr(ast[2])
+                if op == "+" then
+                    result = rhs
+                elseif op == "-" then
+                    result = -rhs
+                elseif op == "not" then
+                    result = boolToInt(not (rhs ~= 0))
+                end
+            elseif ast[1][1] == BIN_OP then
+                local op = ast[1][2]
+                local lhs = eval_expr(ast[2])
+                local rhs = eval_expr(ast[3])
+                if op == "+" then
+                    result = numToInt(lhs + rhs)
+                elseif op == "-" then
+                    result = numToInt(lhs - rhs)
+                elseif op == "*" then
+                    result = numToInt(lhs * rhs)
+                elseif op == "/" then
+                    if rhs == 0 then
+                        result = 0
+                    else
+                        result = numToInt(lhs / rhs)
+                    end
+                elseif op == "%" then
+                    if rhs == 0 then
+                        result = 0
+                    else
+                        result = numToInt(lhs % rhs)
+                    end
+                elseif op == "and" then
+                    result = boolToInt((lhs ~= 0) and (rhs ~= 0))
+                elseif op == "or" then
+                    result = boolToInt((lhs ~= 0) or (rhs ~= 0))
+                elseif op == "==" then
+                    result = boolToInt(lhs == rhs)
+                elseif op == "!=" then
+                    result = boolToInt(lhs ~= rhs)
+                elseif op == "<" then
+                    result = boolToInt(lhs < rhs)
+                elseif op == "<=" then
+                    result = boolToInt(lhs <= rhs)
+                elseif op == ">" then
+                    result = boolToInt(lhs > rhs)
+                elseif op == ">=" then
+                    result = boolToInt(lhs >= rhs)
+                end
+            end
         end
 
         return result
