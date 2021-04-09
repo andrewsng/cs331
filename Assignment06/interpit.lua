@@ -256,7 +256,7 @@ function interpit.interp(ast, state, incall, outcall)
                 result = 0
             end
         elseif ast[1] == BOOLLIT_VAL then
-            result = boolToInt(ast[2])
+            result = boolToInt(ast[2] == "true")
         elseif ast[1] == FUNC_CALL then
             local funcname = ast[2]
             local funcbody = state.f[ast[2]]
