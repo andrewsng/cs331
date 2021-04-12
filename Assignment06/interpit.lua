@@ -189,6 +189,8 @@ function interpit.interp(ast, state, incall, outcall)
     local interp_stmt_list
     local interp_stmt
     local eval_expr
+    local get_lvalue
+    local set_lvalue
 
 
     -- interp_stmt_list
@@ -237,19 +239,7 @@ function interpit.interp(ast, state, incall, outcall)
             end
             interp_stmt_list(funcbody)
         elseif ast[1] == ASSN_STMT then
-            if ast[2][1] == SIMPLE_VAR then
-                local var = ast[2][2]
-                local rhs = eval_expr(ast[3])
-                state.v[var] = rhs
-            else
-                local var = ast[2][2]
-                if state.a[var] == nil then
-                    state.a[var] = {}
-                end
-                local index = eval_expr(ast[2][3])
-                local rhs = eval_expr(ast[3])
-                state.a[var][index] = rhs
-            end
+            set_lvalue(ast[2], ast[3])
         elseif ast[1] == IF_STMT then
             for i = 2, #ast, 2 do
                 if ast[i][1] == STMT_LIST then
@@ -292,20 +282,9 @@ function interpit.interp(ast, state, incall, outcall)
         if ast[1] == NUMLIT_VAL then
             result = strToNum(ast[2])
         elseif ast[1] == SIMPLE_VAR then
-            result = state.v[ast[2]]
-            if result == nil then
-                result = 0
-            end
+            result = get_lvalue(ast)
         elseif ast[1] == ARRAY_VAR then
-            local array = state.a[ast[2]]
-            local index = eval_expr(ast[3])
-            if array == nil then
-                array = {[index]=0}
-            end
-            result = array[index]
-            if result == nil then
-                result = 0
-            end
+            result = get_lvalue(ast)
         elseif ast[1] == BOOLLIT_VAL then
             result = boolToInt(ast[2] == "true")
         elseif ast[1] == FUNC_CALL then
@@ -315,10 +294,7 @@ function interpit.interp(ast, state, incall, outcall)
                 funcbody = { STMT_LIST }
             end
             interp_stmt_list(funcbody)
-            result = state.v["return"]
-            if result == nil then
-                result = 0
-            end
+            result = get_lvalue({ SIMPLE_VAR, "return" })
         elseif ast[1] == READNUM_CALL then
             result = strToNum(incall())
         elseif type(ast[1]) == "table" then
@@ -375,6 +351,45 @@ function interpit.interp(ast, state, incall, outcall)
         end
 
         return result
+    end
+    
+
+    function get_lvalue(ast)
+        local result
+        
+        if ast[1] == SIMPLE_VAR then
+            result = state.v[ast[2]]
+            if result == nil then
+                result = 0
+            end
+        else  -- ARRAY_VAR
+            local array = state.a[ast[2]]
+            local index = eval_expr(ast[3])
+            if array == nil then
+                array = {[index]=0}
+            end
+            result = array[index]
+            if result == nil then
+                result = 0
+            end
+        end
+        
+        return result
+    end
+    
+
+    function set_lvalue(ast, expr)
+        local var = ast[2]
+        local rhs = eval_expr(expr)
+        if ast[1] == SIMPLE_VAR then
+            state.v[var] = rhs
+        else  -- ARRAY_VAR
+            if state.a[var] == nil then
+                state.a[var] = {}
+            end
+            local index = eval_expr(ast[3])
+            state.a[var][index] = rhs
+        end
     end
 
 
