@@ -1,10 +1,15 @@
--- interpit.lua  INCOMPLETE
--- Glenn G. Chappell
--- 2021-03-31
+-- interpit.lua
+-- Andrew S. Ng
+-- Started: 2021-04-08
+-- Updated: 2021-04-11
 --
--- For CS F331 / CSCE A331 Spring 2021
+-- For CS 331 Spring 2021
 -- Interpret AST from parseit.parse
 -- Solution to Assignment 6, Exercise 2
+--
+-- Original interpit.lua by
+-- Glenn G. Chappell
+-- 2021-03-31
 
 
 -- *** To run a Caracal program, use caracal.lua, which uses this file.
@@ -239,7 +244,7 @@ function interpit.interp(ast, state, incall, outcall)
             end
             interp_stmt_list(funcbody)
         elseif ast[1] == ASSN_STMT then
-            set_lvalue(ast[2], ast[3])
+            set_lvalue(ast[2], eval_expr(ast[3]))
         elseif ast[1] == IF_STMT then
             for i = 2, #ast, 2 do
                 if ast[i][1] == STMT_LIST then
@@ -354,6 +359,9 @@ function interpit.interp(ast, state, incall, outcall)
     end
     
 
+    -- get_lvalue
+    -- Given the AST of an lvalue, returns its current value or
+    -- 0 if it is undefined.
     function get_lvalue(ast)
         local result
         
@@ -378,17 +386,19 @@ function interpit.interp(ast, state, incall, outcall)
     end
     
 
-    function set_lvalue(ast, expr)
+    -- set_lvalue
+    -- Given the AST of an lvalue, and the value it is set to,
+    -- updates the state accordingly.
+    function set_lvalue(ast, val)
         local var = ast[2]
-        local rhs = eval_expr(expr)
         if ast[1] == SIMPLE_VAR then
-            state.v[var] = rhs
+            state.v[var] = val
         else  -- ARRAY_VAR
             if state.a[var] == nil then
                 state.a[var] = {}
             end
             local index = eval_expr(ast[3])
-            state.a[var][index] = rhs
+            state.a[var][index] = val
         end
     end
 
